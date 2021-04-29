@@ -53,16 +53,19 @@ void Heap::dequeue() {
     if (numItems < 1) 
         return;
     
-    PrintJob* temp = arr[0];
+    //PrintJob* temp = arr[0];
 
     arr[0] = arr[numItems-1];
-    delete temp;
+    //delete temp;
     numItems--;
 
     trickleDown(0);
 }
 
-PrintJob* Heap::highest() {    
+PrintJob* Heap::highest() {
+    if (numItems < 1)
+        return nullptr;
+
     return arr[0];
 }
 
@@ -97,7 +100,7 @@ void Heap::trickleDown(int location){
         index = leftChild;
 
     if (rightChild < numItems && (arr[rightChild]->getPriority() > arr[index]->getPriority()))
-        index = leftChild;
+        index = rightChild;
 
     if (location != index) {
         PrintJob *temp = arr[location];
