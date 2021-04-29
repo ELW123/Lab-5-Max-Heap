@@ -21,40 +21,31 @@ void Heap::enqueue( PrintJob* insert) {
     PrintJob* temp;
 
     // if full array
-    if (numItems > 9)
+    if (numItems >= MAX_HEAP_SIZE)
         return;
-    
-    // if empty array
-    if (numItems == 0) {
-        arr[0] = insert;
-        numItems++;
-        return;
-    }
-    
-    /* Personal implementation
-    for (int i = 0; i < numItems; i++) {
-        if (arr[i]->getPriority() < insert->getPriority()) {
-            numItems++;
 
-            for (int j = numItems - 1; j > i; j--) {
-                arr[j] = arr[j-1];
-            }
 
-            arr[i] = insert;
-            break;
-        }
+    arr[numItems] = insert;
+    int i = numItems;
+    numItems++;
+
+    // parent node should be (i-1)/2 regardeless of root node starting node, assuming complete node, def of max heap
+    // for loop should percolate up insert, check parent every run, and sets i to the location of the next parent after run
+    /*
+    for (int i = numItems - 1; (i != 0) && (arr[(i-1)/2]->getPriority() < arr[i]->getPriority()); i = (i-1)/2) {
+        temp = arr[(i-1)/2];
+        arr[(i-1)/2] = arr[i];
+        arr[i] = temp;
     } */
 
-    numItems++;
-    arr[numItems - 1] = insert;
-
-    for (int i = numItems - 1; i > 0; i--) {
-        if (arr[i]->getPriority() > arr[i-1]->getPriority()) {
-            temp = arr[i-1];
-            arr[i-1] = arr[i];
-            arr[i] = temp;
-        }
-    }
+    while((i != 0) && (arr[(i-1)/2]->getPriority() < arr[i]->getPriority()))
+       {
+           temp = arr[(i-1)/2];
+           arr[(i-1)/2] = arr[i];
+           arr[i] = temp;
+           
+           i = (i-1)/2;
+       }
 }
 
 void Heap::dequeue() {
@@ -62,34 +53,23 @@ void Heap::dequeue() {
     if (numItems < 1) 
         return;
     
-    PrintJob* temp;
+    PrintJob* temp = arr[0];
 
     arr[0] = arr[numItems-1];
-
+    delete temp;
     numItems--;
 
-    for (int i = 0; i < numItems; i++) {
-        if (arr[i]->getPriority() < arr[i+1]->getPriority()) {
-            temp = arr[i+1];
-            arr[i+1] = arr[i];
-            arr[i] = temp;
-        }
-    }
+    trickleDown(0);
 }
 
-PrintJob* Heap::highest() {
-    int highestIndex = 0;
-    for (int i = 0; i < numItems - 1; i++) {
-        if (arr[i]->getPriority() < arr[i+1]->getPriority())
-            highestIndex = i + 1;
-    }
-
-    return arr[highestIndex];
+PrintJob* Heap::highest() {    
+    return arr[0];
 }
 
 // uses highest function
 void Heap::print() {
     // zybooks use
+       
     PrintJob* value = highest();
 
     cout << "Priority: " << value->getPriority() 
@@ -97,8 +77,8 @@ void Heap::print() {
          << ", Number of Pages: " << value->getPages()
          << endl;
     
-
-    /* // Personal use, for displaying all the values in arr[]
+    /*
+    // Personal use, for displaying all the values in arr[]
     for (int i = 0; i < numItems; i++) {
         cout << "Priority: " << arr[i]->getPriority() 
              << ", Job Number: " << arr[i]->getJobNumber()
@@ -107,6 +87,23 @@ void Heap::print() {
     } */
 }
 
-void Heap::trickleDown(int value){
-    
+void Heap::trickleDown(int location){
+    int leftChild = 2*location + 1;
+    int rightChild = 2*location + 2;
+
+    int index = location;
+
+    if (leftChild < numItems && (arr[leftChild]->getPriority() > arr[index]->getPriority()))
+        index = leftChild;
+
+    if (rightChild < numItems && (arr[rightChild]->getPriority() > arr[index]->getPriority()))
+        index = leftChild;
+
+    if (location != index) {
+        PrintJob *temp = arr[location];
+        arr[location] = arr[index];
+        arr[index] = temp;
+
+        trickleDown(index);
+    }
 }
